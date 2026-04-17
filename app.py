@@ -1,34 +1,24 @@
-import gradio as gr
-import pandas as pd
-import joblib
+from flask import Flask, render_template, request
+import pickle
+import numpy as np
+
+app = Flask(__name__)
 
 # Load model
-model = joblib.load("health_model.pkl")
-scaler = joblib.load("scaler.pkl")
+model = pickle.load(open('model.pkl', 'rb'))
 
-def predict(preg, glucose, bp, skin, insulin, bmi, dpf, age):
-    input_data = pd.DataFrame(
-        [[preg, glucose, bp, skin, insulin, bmi, dpf, age]],
-        columns=[
-            "Pregnancies", "Glucose", "BloodPressure", "SkinThickness",
-            "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"
-        ]
-    )
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    features = [float(x) for x in request.form.values()]
+    final_input = np.array([features])
     
-    input_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_scaled)
-    
-    return "⚠️ Diabetic" if prediction[0] == 1 else "✅ Not Diabetic"
+    prediction = model.predict(final_input)
 
-# UI
-demo = gr.Interface(
-    fn=predict,
-    inputs=[
-        "number","number","number","number",
-        "number","number","number","number"
-    ],
-    outputs="text",
-    title="Diabetes Prediction System"
-)
+    return render_template('index.html', prediction_text=f"Prediction: {prediction[0]}")
 
-demo.launch()
+if __name__ == "__main__":
+    app.run(debug=True)
