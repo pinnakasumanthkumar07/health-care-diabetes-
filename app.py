@@ -7,7 +7,8 @@ model = joblib.load("health_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
 st.title("🧠 Diabetes Prediction System")
-st.write("Enter patient details below:")
+
+st.write("Enter patient details:")
 
 # Inputs
 preg = st.number_input("Pregnancies", 0, 20)
@@ -19,7 +20,6 @@ bmi = st.number_input("BMI", 0.0, 60.0)
 dpf = st.number_input("Diabetes Pedigree Function", 0.0, 2.5)
 age = st.number_input("Age", 1, 120)
 
-# Button
 if st.button("Predict"):
     input_data = pd.DataFrame(
         [[preg, glucose, bp, skin, insulin, bmi, dpf, age]],
